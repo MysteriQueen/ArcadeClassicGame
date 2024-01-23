@@ -7,16 +7,21 @@
         const cCanvasPosX = 0; //A constant which stores canvas x position
         const cCanvasPosY = 0; //A constant which stores canvas y position
         const cBallRadius = 10; //A constant which stores the radius of the ball
-        const cPaddleWidth = 10; //A constant which stores the width of the paddle
-        const cPaddleHeight = 100; //A constant which stores the height of the paddle
+        const cPlayerPaddleWidth = 30; //A constant which stores the width of the player paddle
+        const cPlayerPaddleHeight = 100; //A constant which stores the height of the player paddle
+        const cCompPaddleWidth = 10; //A constant which stores the width of the player paddle
+        const cCompPaddleHeight = 100; //A constant which stores the height of the player paddle
         var vCanvas; //Stores reference to the canvas
         var vCanvasContext; //Stores reference to the drawing context (object that enables you to add graphics)
         var vCanvasWidth; //Stores the width of the canvas
         var vCanvasHeight; //Stores the height of the canvas
         var vBallPosX; //Stores ball x position
         var vBallPosY; //Stores ball y position
-        var vBallSpeedX = 5; //Stores the speed of the ball in the x direction
-        var vBallSpeedY = 5; //Stores the speed of the ball in the y direction
+        //var vBallSpeedX = 5; //Stores the speed of the ball in the x direction
+        //var vBallSpeedY = 5; //Stores the speed of the ball in the y direction
+        var vBallSpeed = 5; //Stores the speed of the ball
+        var vBallAngleDegrees = 275; //Stores the direction of the ball is travelling in degrees
+        var vBallAngleRadians = vBallAngleDegrees * Math.PI/180; //Stores the direction of the ball is travelling in radians
         var vPlayerPaddlePosX; //Stores the player paddle x position
         var vPlayerPaddlePosY; //Stores the player paddle y position
         var vCompPaddlePosX; //Stores the computer paddle x position
@@ -46,10 +51,10 @@
             vBallPosY = vCanvasHeight/2 + cBallRadius/2;
             //Set player paddle coordinates to the LEFT side
             vPlayerPaddlePosX = 0;
-            vPlayerPaddlePosY = vCanvasHeight/2 - cPaddleHeight/2;
+            vPlayerPaddlePosY = vCanvasHeight/2 - cPlayerPaddleHeight/2;
             //Set computer paddle coordinates to the RIGHT side
-            vCompPaddlePosX = vCanvasWidth - cPaddleWidth;
-            vCompPaddlePosY = vCanvasHeight/2 - cPaddleHeight/2;
+            vCompPaddlePosX = vCanvasWidth - cCompPaddleWidth;
+            vCompPaddlePosY = vCanvasHeight/2 - cCompPaddleHeight/2;
             //Set up the graphics
             drawEverything();
         }
@@ -59,25 +64,46 @@
             moveBall();
             //Move the paddle
             movePaddle();
+            //Check for collisions
+            checkCollisions();
         }
 
         function moveBall() {
-            //Move the ball in the x and y directions
-            vBallPosX += vBallSpeedX;
-            vBallPosY += vBallSpeedY;
-            //Ball rebound in the x direction and y directions
-            if(vBallPosX > vCanvasWidth - cBallRadius || vBallPosX < cBallRadius) { vBallSpeedX = -vBallSpeedX; }
-            if(vBallPosY > vCanvasHeight - cBallRadius || vBallPosY < cBallRadius) { vBallSpeedY = -vBallSpeedY; }
+            //Move the ball using angles
+            //vBallPosX += vBallSpeed;
+            //vBallPosX += vBallSpeed;
+            vBallPosX += vBallSpeed * Math.cos(vBallAngleRadians);
+            vBallPosY += vBallSpeed * Math.sin(vBallAngleRadians);
+            //Ball rebound off walls
+            if (vBallPosX > vCanvasWidth - cBallRadius || vBallPosX < cBallRadius) {
+                vBallAngleRadians = Math.PI - vBallAngleRadians;
+            }
+            if (vBallPosY > vCanvasHeight - cBallRadius || vBallPosY < cBallRadius) {
+                //vBallAngle = -Math.sin(vBallAngle);
+                vBallAngleRadians = -vBallAngleRadians;
+            }
         }
 
-        function movePaddle() {
+        function movePlayerPaddle() {
             //Adds an event to the canvas which will be executed whenever the mouse moves over the canvas
             vCanvas.addEventListener('mousemove', function(evt) {
                 //Calculate and store mouse position
                 var vMousePosition = calculateMousePos(evt);
                 //Set the y coordinate for the player paddle
-                vPlayerPaddlePosY = vMousePosition.vY - cPaddleHeight/2;
+                vPlayerPaddlePosY = vMousePosition.vY - cPlayerPaddleHeight/2;
             });
+        }
+
+        function checkCollisions() {
+            // Check collision with player paddle
+            if (vBallPosX - cBallRadius < vPlayerPaddlePosX + cPaddleWidth &&
+                vBallPosX + cBallRadius > vPlayerPaddlePosX &&
+                vBallPosY > vPlayerPaddlePosY &&
+                vBallPosY < vPlayerPaddlePosY + cPaddleHeight
+            ) {
+                // Ball hit the player paddle, change direction
+                vBallSpeedX = -vBallSpeedX;
+            }
         }
 
         function drawEverything() {
@@ -86,9 +112,9 @@
             //Draw a white ball on the canvas at x and y, with the radius as 10, start and end angles in radians represents full cirle, clockwise
             drawArc('white', vBallPosX, vBallPosY, cBallRadius, 0, Math.PI * 2, true)
             //Draw the player paddle on the LEFT side
-            drawRect('blue', vPlayerPaddlePosX, vPlayerPaddlePosY, cPaddleWidth, cPaddleHeight)
+            drawRect('blue', vPlayerPaddlePosX, vPlayerPaddlePosY, cPlayerPaddleWidth, cPlayerPaddleHeight)
             //Draw the computer paddle on the RIGHT side
-            drawRect('red', vCompPaddlePosX, vCompPaddlePosY, cPaddleWidth, cPaddleHeight)
+            drawRect('red', vCompPaddlePosX, vCompPaddlePosY, cCompPaddleWidth, cCompPaddleHeight)
         }
 
         function drawRect(vColour, vX, vY, vWidth, vHeight) {
