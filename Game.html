@@ -1,0 +1,127 @@
+<html>
+    <!--Create 800 x 600 canvas-->
+    <canvas id="GameCanvas" width="800" height="600"></canvas>
+
+    <script>
+        const cFramesPerSecond = 30; //A constant which stores the number of frames per second
+        const cCanvasPosX = 0; //A constant which stores canvas x position
+        const cCanvasPosY = 0; //A constant which stores canvas y position
+        const cBallRadius = 10; //A constant which stores the radius of the ball
+        const cPaddleWidth = 10; //A constant which stores the width of the paddle
+        const cPaddleHeight = 100; //A constant which stores the height of the paddle
+        var vCanvas; //Stores reference to the canvas
+        var vCanvasContext; //Stores reference to the drawing context (object that enables you to add graphics)
+        var vCanvasWidth; //Stores the width of the canvas
+        var vCanvasHeight; //Stores the height of the canvas
+        var vBallPosX; //Stores ball x position
+        var vBallPosY; //Stores ball y position
+        var vBallSpeedX = 5; //Stores the speed of the ball in the x direction
+        var vBallSpeedY = 5; //Stores the speed of the ball in the y direction
+        var vPlayerPaddlePosX; //Stores the player paddle x position
+        var vPlayerPaddlePosY; //Stores the player paddle y position
+        var vCompPaddlePosX; //Stores the computer paddle x position
+        var vCompPaddlePosY; //Stores the computer paddle y position
+
+        //As soon as the webpage finishes loading, execute function
+        window.onload = function() {
+            //Obtain reference of a HTML element with id 'GameCanvas'
+            vCanvas = document.getElementById('GameCanvas');
+            //Obtain 2D Drawing Context from vCanvas
+            vCanvasContext = vCanvas.getContext('2d');
+            //Initialise global variables and set up graphics
+            setUpGame();
+            //Move the ball using a timer
+            setInterval(function() {
+                moveEverything(); //Move objects
+                drawEverything(); //Draw objects
+            }, 1000/cFramesPerSecond);
+        }
+
+        function setUpGame() {
+            //Initialise the canvas size
+            vCanvasWidth = vCanvas.width;
+            vCanvasHeight = vCanvas.height;
+            //Set ball coordinates to the middle of the canvas
+            vBallPosX = vCanvasWidth/2 + cBallRadius/2;
+            vBallPosY = vCanvasHeight/2 + cBallRadius/2;
+            //Set player paddle coordinates to the LEFT side
+            vPlayerPaddlePosX = 0;
+            vPlayerPaddlePosY = vCanvasHeight/2 - cPaddleHeight/2;
+            //Set computer paddle coordinates to the RIGHT side
+            vCompPaddlePosX = vCanvasWidth - cPaddleWidth;
+            vCompPaddlePosY = vCanvasHeight/2 - cPaddleHeight/2;
+            //Set up the graphics
+            drawEverything();
+        }
+
+        function moveEverything() {
+            //Move the ball
+            moveBall();
+            //Move the paddle
+            movePaddle();
+        }
+
+        function moveBall() {
+            //Move the ball in the x and y directions
+            vBallPosX += vBallSpeedX;
+            vBallPosY += vBallSpeedY;
+            //Ball rebound in the x direction and y directions
+            if(vBallPosX > vCanvasWidth - cBallRadius || vBallPosX < cBallRadius) { vBallSpeedX = -vBallSpeedX; }
+            if(vBallPosY > vCanvasHeight - cBallRadius || vBallPosY < cBallRadius) { vBallSpeedY = -vBallSpeedY; }
+        }
+
+        function movePaddle() {
+            //Adds an event to the canvas which will be executed whenever the mouse moves over the canvas
+            vCanvas.addEventListener('mousemove', function(evt) {
+                //Calculate and store mouse position
+                var vMousePosition = calculateMousePos(evt);
+                //Set the y coordinate for the player paddle
+                vPlayerPaddlePosY = vMousePosition.vY - cPaddleHeight/2;
+            });
+        }
+
+        function drawEverything() {
+            //Draw a black background on the canvas at 0,0 using the dimensions in vCanvas
+            drawRect('black', cCanvasPosX, cCanvasPosY, vCanvasWidth, vCanvasHeight)
+            //Draw a white ball on the canvas at x and y, with the radius as 10, start and end angles in radians represents full cirle, clockwise
+            drawArc('white', vBallPosX, vBallPosY, cBallRadius, 0, Math.PI * 2, true)
+            //Draw the player paddle on the LEFT side
+            drawRect('blue', vPlayerPaddlePosX, vPlayerPaddlePosY, cPaddleWidth, cPaddleHeight)
+            //Draw the computer paddle on the RIGHT side
+            drawRect('red', vCompPaddlePosX, vCompPaddlePosY, cPaddleWidth, cPaddleHeight)
+        }
+
+        function drawRect(vColour, vX, vY, vWidth, vHeight) {
+            //Set the background colour of the rectangle
+            vCanvasContext.fillStyle = vColour;
+            //Draw the rectangle on the canvas using the values inputted
+            vCanvasContext.fillRect(vX, vY, vWidth, vHeight);   
+        }
+
+        function drawArc(vColour, vX, vY, vRadius, vStartingAngle, vEndingAngle, bDrawClockwise) {
+            //Set the background colour of the circle
+            vCanvasContext.fillStyle = vColour;
+            //Start new sequence of drawing commands
+            vCanvasContext.beginPath();
+            //Draw the circle with starting and ending angles in the direction of either clockwise or anticlockwise
+            vCanvasContext.arc(vX, vY, vRadius, vStartingAngle, vEndingAngle, bDrawClockwise)
+            //Fill the drawn cicle with specified colour
+            vCanvasContext.fill();
+        }
+
+        function calculateMousePos(event) {
+            //Store the area of the canvas that is visible
+            var vRectangle = vCanvas.getBoundingClientRect();
+            //Store the root element (which is the html element in this case)
+            var vRoot = document.documentElement;
+            //Calculate the x and y coordinates relative to the area of the canvas that is visible, adjusting for any scrolling
+            var vMouseX = event.clientX - vRectangle.left - vRoot.scrollLeft;
+            var vMouseY = event.clientY - vRectangle.top - vRoot.scrollTop
+            //Return the calculated mouse x and y coordinates relative to the canvas
+            return {
+                vX : vMouseX,
+                vY : vMouseY
+            };
+        }
+    </script>
+</html>
