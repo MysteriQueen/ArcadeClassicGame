@@ -7,7 +7,7 @@
         const cCanvasPosX = 0; //A constant which stores canvas x position
         const cCanvasPosY = 0; //A constant which stores canvas y position
         const cBallRadius = 10; //A constant which stores the radius of the ball
-        const cPlayerPaddleWidth = 30; //A constant which stores the width of the player paddle
+        const cPlayerPaddleWidth = 50; //A constant which stores the width of the player paddle
         const cPlayerPaddleHeight = 100; //A constant which stores the height of the player paddle
         const cCompPaddleWidth = 10; //A constant which stores the width of the player paddle
         const cCompPaddleHeight = 100; //A constant which stores the height of the player paddle
@@ -17,10 +17,8 @@
         var vCanvasHeight; //Stores the height of the canvas
         var vBallPosX; //Stores ball x position
         var vBallPosY; //Stores ball y position
-        //var vBallSpeedX = 5; //Stores the speed of the ball in the x direction
-        //var vBallSpeedY = 5; //Stores the speed of the ball in the y direction
         var vBallSpeed = 5; //Stores the speed of the ball
-        var vBallAngleDegrees = 275; //Stores the direction of the ball is travelling in degrees
+        var vBallAngleDegrees = 125; //Stores the direction of the ball is travelling in degrees
         var vBallAngleRadians = vBallAngleDegrees * Math.PI/180; //Stores the direction of the ball is travelling in radians
         var vPlayerPaddlePosX; //Stores the player paddle x position
         var vPlayerPaddlePosY; //Stores the player paddle y position
@@ -35,6 +33,7 @@
             vCanvasContext = vCanvas.getContext('2d');
             //Initialise global variables and set up graphics
             setUpGame();
+            console.log(vPlayerPaddlePosX, vPlayerPaddlePosY)
             //Move the ball using a timer
             setInterval(function() {
                 moveEverything(); //Move objects
@@ -62,26 +61,25 @@
         function moveEverything() {
             //Move the ball
             moveBall();
-            //Move the paddle
-            movePaddle();
-            //Check for collisions
-            checkCollisions();
+            //Move the player paddle
+            movePlayerPaddle();
+            //Check for collisions between the ball and paddles
+            //checkBallCollisions();
         }
 
         function moveBall() {
             //Move the ball using angles
-            //vBallPosX += vBallSpeed;
-            //vBallPosX += vBallSpeed;
             vBallPosX += vBallSpeed * Math.cos(vBallAngleRadians);
             vBallPosY += vBallSpeed * Math.sin(vBallAngleRadians);
-            //Ball rebound off walls
-            if (vBallPosX > vCanvasWidth - cBallRadius || vBallPosX < cBallRadius) {
+            //Ball rebound off LEFT or RIGHT walls
+            if (vBallPosX < cBallRadius || vBallPosX > vCanvasWidth - cBallRadius) {
                 vBallAngleRadians = Math.PI - vBallAngleRadians;
             }
-            if (vBallPosY > vCanvasHeight - cBallRadius || vBallPosY < cBallRadius) {
-                //vBallAngle = -Math.sin(vBallAngle);
+            //Ball rebound off TOP or BOTTOM walls
+            if (vBallPosY < cBallRadius || vBallPosY > vCanvasHeight - cBallRadius) {
                 vBallAngleRadians = -vBallAngleRadians;
             }
+            console.log(vBallAngleRadians / Math.PI*180)
         }
 
         function movePlayerPaddle() {
@@ -92,19 +90,20 @@
                 //Set the y coordinate for the player paddle
                 vPlayerPaddlePosY = vMousePosition.vY - cPlayerPaddleHeight/2;
             });
+            //Check for collisions between the ball and the player paddle
+            checkPaddleBallCollision(vBallPosX, vBallPosY,);
         }
 
-        function checkCollisions() {
-            // Check collision with player paddle
-            if (vBallPosX - cBallRadius < vPlayerPaddlePosX + cPaddleWidth &&
-                vBallPosX + cBallRadius > vPlayerPaddlePosX &&
-                vBallPosY > vPlayerPaddlePosY &&
-                vBallPosY < vPlayerPaddlePosY + cPaddleHeight
-            ) {
-                // Ball hit the player paddle, change direction
-                vBallSpeedX = -vBallSpeedX;
+        function checkBallCollisions() {
+            //Check collision between the ball and the player paddle
+            if (vBallPosX - cBallRadius < vPlayerPaddlePosX + cPlayerPaddleWidth &&
+            vBallPosX + cBallRadius > vPlayerPaddlePosX &&
+            vBallPosY - cBallRadius < vPlayerPaddlePosY + cPlayerPaddleHeight &&
+            vBallPosY + cBallRadius > vPlayerPaddlePosY) {
+                // Ball hit the player or computer paddle, change direction
+                vBallSpeed = -vBallSpeed;
             }
-        }
+        }*/
 
         function drawEverything() {
             //Draw a black background on the canvas at 0,0 using the dimensions in vCanvas
